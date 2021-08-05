@@ -1,0 +1,11 @@
+.btnload {
+  background: transparent;
+  border: 0;
+  color: var(--pink);
+  font-weight: 600;
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(0.9);
+  }
+}
