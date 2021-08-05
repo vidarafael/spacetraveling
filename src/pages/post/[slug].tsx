@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 
@@ -46,30 +47,21 @@ export default function Post({ post }: PostProps): JSX.Element {
     return <div>Carregando...</div>;
   }
 
-  const reduceIterator = post.data.content.reduce(
-    (acc, item) => {
-      if (item.body) {
-        const valueTextBody = item.body.reduce((accumulator, data) => {
-          accumulator += data.text.length;
-          return accumulator;
-        }, 0);
-        acc.textBody = valueTextBody;
-      }
-      if (item.heading) {
-        acc.textHeading += item.heading.length;
-      }
-      acc.total = acc.textBody + acc.textHeading;
+  const reduceIterator = post.data.content.reduce((acc, item) => {
+      acc.textHeading += item.heading;
+      acc.textBody += RichText.asText(item.body);
       return acc;
     },
-    {
-      textBody: 0,
-      textHeading: 0,
-      total: 0,
-    }
+    { textHeading: '', textBody: '' }
   );
 
-  const minutesToRead = Math.ceil(reduceIterator.total / 200);
+  const totalLetersInText =
+    reduceIterator.textHeading.split(' ').length +
+    reduceIterator.textBody.split(' ').length;
 
+  console.log(reduceIterator.textHeading.split(' ').length);
+
+  const totalMinutesReadText = Math.ceil(totalLetersInText / 200);
   return (
     <>
       <Head>
@@ -91,15 +83,16 @@ export default function Post({ post }: PostProps): JSX.Element {
           <section>
             <time>
               <FiCalendar size={16} color="#d7d7d7" />
-              {post.first_publication_date}
+              {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                locale: ptBR,
+              })}
             </time>
             <span>
               <FiUser size={16} color="#d7d7d7" />
               {post.data.author}
             </span>
             <time>
-              <FiClock size={16} color="#d7d7d7" />
-              {minutesToRead} min
+              <FiClock size={16} color="#d7d7d7" />3 min
             </time>
           </section>
 
@@ -143,15 +136,11 @@ export const getStaticProps: GetStaticProps = async context => {
   const response = await prismic.getByUID('posts', String(slug), {});
 
   const post = {
-    first_publication_date: format(
-      new Date(response.first_publication_date),
-      'dd MMM yyyy',
-      {
-        locale: ptBR,
-      }
-    ),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },

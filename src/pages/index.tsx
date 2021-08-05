@@ -41,7 +41,27 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   const [nextPagePrismic, setNextPagePrismic] = useState('');
 
   useEffect(() => {
-    setPosts([...postsPagination.results]);
+    const formatPost = postsPagination.results.map(post => {
+      return {
+        uid: post.uid,
+        first_publication_date: format(
+          new Date(post.first_publication_date),
+          'dd MMM yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      };
+    });
+
+    console.log(formatPost);
+
+    setPosts([...formatPost]);
     setNextPagePrismic(postsPagination.next_page);
   }, []);
 
@@ -158,13 +178,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const results = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
