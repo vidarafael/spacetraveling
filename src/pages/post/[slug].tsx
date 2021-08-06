@@ -41,8 +41,6 @@ interface PostProps {
 export default function Post({ post }: PostProps): JSX.Element {
   const router = useRouter();
 
-  console.log(router.isFallback);
-
   if (router.isFallback) {
     return <div>Carregando...</div>;
   }
@@ -73,7 +71,7 @@ export default function Post({ post }: PostProps): JSX.Element {
         <img src={post.data.banner.url} alt="banner" />
       </div>
 
-      <main className={styles.container}>
+      <main className={`${styles.container} ${commonStyles.maxWidth1120}`}>
         <article className={styles.content}>
           <h1>{post.data.title}</h1>
 
