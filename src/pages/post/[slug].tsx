@@ -48,20 +48,17 @@ export default function Post({ post }: PostProps): JSX.Element {
   }
 
   const reduceIterator = post.data.content.reduce((acc, item) => {
-      acc.textHeading += item.heading;
-      acc.textBody += RichText.asText(item.body);
+      acc.textTotal += item.heading;
+      acc.textTotal += RichText.asText(item.body);
       return acc;
     },
-    { textHeading: '', textBody: '' }
+    { textTotal: '' }
   );
 
-  const totalLetersInText =
-    reduceIterator.textHeading.split(' ').length +
-    reduceIterator.textBody.split(' ').length;
+  const totalWordsInText = Math.ceil(
+    reduceIterator.textTotal.split(' ').length / 200
+  );
 
-  console.log(reduceIterator.textHeading.split(' ').length);
-
-  const totalMinutesReadText = Math.ceil(totalLetersInText / 200);
   return (
     <>
       <Head>
@@ -92,7 +89,8 @@ export default function Post({ post }: PostProps): JSX.Element {
               {post.data.author}
             </span>
             <time>
-              <FiClock size={16} color="#d7d7d7" />3 min
+              <FiClock size={16} color="#d7d7d7" />
+              {`${totalWordsInText} min`}
             </time>
           </section>
 
