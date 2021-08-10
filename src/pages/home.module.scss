@@ -43,4 +43,14 @@
   button {
     margin: 3rem 0;
   }
+
+  .btnExitPreview {
+    margin: 3rem 0;
+    transition: filter 0.2s;
+
+    &:hover {
+      color: var(--black);
+      filter: brightness(0.8);
+    }
+  }
 }

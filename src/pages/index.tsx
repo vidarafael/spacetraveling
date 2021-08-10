@@ -34,9 +34,13 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
-export default function Home({ postsPagination }: HomeProps): JSX.Element {
+export default function Home({
+  postsPagination,
+  preview,
+}: HomeProps): JSX.Element {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextPagePrismic, setNextPagePrismic] = useState('');
 
@@ -129,6 +133,18 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         >
           Carregar mais posts
         </button>
+
+        {preview && (
+          <aside>
+            <Link href="/api/exit-preview">
+              <a
+                className={`${styles.btnExitPreview} ${commonStyles.btnExitPreview}`}
+              >
+                Sair do modo Preview
+              </a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   ) : (
@@ -158,22 +174,37 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             </a>
           </Link>
         ))}
+
+        {preview && (
+          <aside>
+            <Link href="/api/exit-preview">
+              <a
+                className={`${styles.btnExitPreview} ${commonStyles.btnExitPreview}`}
+              >
+                Sair do modo Preview
+              </a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.content', 'posts.author'],
-      pageSize: 2,
+      pageSize: 1,
+      orderings: '[document.first_publication_date]',
+      ref: previewData?.ref ?? null,
     }
   );
-
-  // console.log(JSON.stringify(postsResponse, null, 2));
 
   const { next_page } = postsResponse;
 
@@ -195,6 +226,7 @@ export const getStaticProps: GetStaticProps = async () => {
         next_page,
         results,
       },
+      preview,
     },
     revalidate: 60 * 30,
   };
