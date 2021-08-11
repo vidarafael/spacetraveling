@@ -41,14 +41,28 @@ interface Post {
   };
 }
 
+interface navigationPostsProps {
+  propsNextPost?: {
+    uid: string;
+    title: string;
+  };
+  propsPreviousPost?: {
+    uid: string;
+    title: string;
+  };
+}
+
 interface PostProps {
   post: Post;
   preview: boolean;
+  navigationPosts: navigationPostsProps;
 }
 
-export default function Post({ post, preview }: PostProps): JSX.Element {
-  const [linkNextPage, setLinkNextPage] = useState('');
-  const [linkPrevPage, setLinkPrevPage] = useState('');
+export default function Post({
+  post,
+  preview,
+  navigationPosts,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -66,7 +80,6 @@ export default function Post({ post, preview }: PostProps): JSX.Element {
   const totalWordsInText = Math.ceil(
     reduceIterator.textTotal.split(' ').length / 200
   );
-
   return (
     <>
       <Head>
@@ -134,20 +147,22 @@ export default function Post({ post, preview }: PostProps): JSX.Element {
         <hr />
 
         <div className={styles.containerBtnPages}>
-          <a
-            href="#"
-            className={`${commonStyles.btnload} ${styles.btnPagesBefore}`}
-          >
-            <span>Como utilizar Hooks</span> <br />
-            Post anterior
-          </a>
-          <a
-            href="#"
-            className={`${commonStyles.btnload} ${styles.btnPagesAfter}`}
-          >
-            <span>Criando um app CRA do Zero</span> <br />
-            Próximo Post
-          </a>
+          {navigationPosts.propsPreviousPost.uid && (
+            <Link href={`/post/${navigationPosts.propsPreviousPost.uid}`}>
+              <a className={`${commonStyles.btnload} ${styles.btnPagesBefore}`}>
+                <span>{navigationPosts.propsPreviousPost.title}</span> <br />
+                Post anterior
+              </a>
+            </Link>
+          )}
+          {navigationPosts.propsNextPost.uid && (
+            <Link href={`/post/${navigationPosts.propsNextPost.uid}`}>
+              <a className={`${commonStyles.btnload} ${styles.btnPagesAfter}`}>
+                <span>{navigationPosts.propsNextPost.title}</span> <br />
+                Próximo Post
+              </a>
+            </Link>
+          )}
         </div>
 
         <Utterance />
@@ -195,33 +210,44 @@ export const getStaticProps: GetStaticProps = async context => {
     ref: previewData?.ref || null,
   });
 
-  const postsResponse = await prismic.query(
-    [Prismic.predicates.at('document.id', slug)],
+  const allPosts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.content', 'posts.author'],
-      pageSize: 1,
+      pageSize: 100,
       ref: previewData?.ref ?? null,
     }
   );
 
-  const prevpost = await prismic.query(
+  const nextPost = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
+      fetch: ['posts.title'],
       pageSize: 1,
-      after: `${response.id}`,
+      ref: previewData?.ref ?? null,
+      after: response.id,
       orderings: '[my.posts.date desc]',
     }
   );
 
-  const nextpost = await prismic.query(
-    [Prismic.predicates.at('document.type', 'posts')],
-    {
-      pageSize: 1,
-      after: `${response.id}`,
-      orderings: '[my.posts.date]',
-    }
-  );
-  console.log(prevpost.results[0]);
+  const propsNextPost = nextPost.results.map(post => {
+    return {
+      uid: post.uid,
+      title: post.data.title,
+    };
+  });
+
+  const findIndexPageCurrent =
+    allPosts.results.findIndex(post => post.uid === response.uid) - 1;
+
+  const previousPage = allPosts.results[findIndexPageCurrent];
+
+  const propsPreviousPage = {
+    uid: previousPage?.uid ?? null,
+    title: previousPage?.data.title ?? null,
+  };
+
+  console.log(propsPreviousPage)
 
   const post = {
     uid: response.uid,
@@ -243,10 +269,21 @@ export const getStaticProps: GetStaticProps = async context => {
     },
   };
 
+  const ifNotExistsPropsNextPost = {
+    uid: null,
+    title: null,
+  };
+
   return {
     props: {
       post,
       preview: preview || null,
+      navigationPosts: {
+        propsNextPost: propsNextPost[0]
+          ? propsNextPost[0]
+          : ifNotExistsPropsNextPost,
+        propsPreviousPost: propsPreviousPage,
+      },
     },
     revalidate: 60 * 30, // 30 min
   };

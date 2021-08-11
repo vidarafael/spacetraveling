@@ -63,8 +63,6 @@ export default function Home({
       };
     });
 
-    console.log(formatPost);
-
     setPosts([...formatPost]);
     setNextPagePrismic(postsPagination.next_page);
   }, []);
@@ -201,7 +199,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async ({
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.content', 'posts.author'],
       pageSize: 1,
-      orderings: '[document.first_publication_date]',
       ref: previewData?.ref ?? null,
     }
   );
