@@ -1,7 +1,7 @@
 # 💻 Aplicação 💻
 ![spacetraveling](https://user-images.githubusercontent.com/73259242/129103438-5638f780-ea2a-4a9d-98a1-14704c7a15f1.gif)
 
-### Aplicação Modo Preview Prismisc
+### Aplicação com modo Preview do Prismisc
 ![spacetravelingWithModePreview](https://user-images.githubusercontent.com/73259242/129103555-26a7f06f-14bd-4759-9714-0ad95a2b8f10.gif)
 
 ## Sobre 🧾
