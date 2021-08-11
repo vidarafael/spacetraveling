@@ -156,7 +156,7 @@ export default function Home({
       <main className={`${styles.container} ${commonStyles.maxWidth1120}`}>
         {posts.map(post => (
           <Link href={`/post/${post.uid}`} key={post.uid}>
-            <a>
+            <a className={styles.linkAnimation}>
               <h1>{post.data.title}</h1>
               <p>{post.data.subtitle}</p>
               <div>

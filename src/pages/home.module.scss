@@ -5,6 +5,7 @@
   a {
     display: block;
     transition: color 0.2s;
+    animation: slideUp 1s forwards 0s;
 
     & + a {
       margin: 2rem 0;
@@ -52,5 +53,16 @@
       color: var(--black);
       filter: brightness(0.8);
     }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(2rem);
+    filter: brightness(0.7);
+  }
+  to {
+    transform: translateY(0);
+    filter: brightness(1);
   }
 }
